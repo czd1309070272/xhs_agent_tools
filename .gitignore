@@ -1,0 +1,4 @@
+**/__pycache__/
+.env*
+.claude
+**/xhs_browser_data/
