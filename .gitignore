@@ -2,3 +2,12 @@
 .env*
 .claude
 **/xhs_browser_data/
+xhs_agent_data.db
+xhs_agent_data.db-shm
+xhs_agent_data.db-wal
+preview_results.json
+task_run_history.json
+ai_settings.json
+.pycache_tmp/
+node_modules/
+dist/

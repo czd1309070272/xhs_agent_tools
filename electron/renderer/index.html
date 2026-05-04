@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>XHS Agent Desktop</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="appErrorBanner" class="app-error-banner" hidden>
+      <div class="app-error-banner-head">
+        <strong>桌面端启动异常</strong>
+        <span id="appErrorMeta">等待诊断</span>
+      </div>
+      <pre id="appErrorText" class="app-error-text"></pre>
+    </div>
+
+    <div id="taskHistoryShell" class="task-history-shell">
+      <aside id="taskHistorySidebar" class="task-history-sidebar">
+        <div class="task-history-sidebar-head">
+          <div>
+            <p class="section-kicker">Task History</p>
+            <h3>任务记录</h3>
+          </div>
+        </div>
+        <p class="subtle-label">保存运行过的任务输入、返回帖子数和执行时间。</p>
+        <div id="taskHistoryEmptyState" class="task-history-empty">还没有运行记录。</div>
+        <div id="taskHistoryList" class="task-history-list"></div>
+      </aside>
+      <button id="taskHistoryToggleButton" class="task-history-tab" type="button">
+        <span id="taskHistoryToggleIcon" class="task-history-tab-icon">&gt;</span>
+        <span class="task-history-tab-label">任务记录</span>
+      </button>
+    </div>
+
+    <div class="app-shell">
+      <main id="mainPage" class="workspace">
+        <section class="panel login-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">XHS Login</p>
+              <h2>小红书登录</h2>
+            </div>
+            <div class="status-pill" id="loginStatus">检查中</div>
+          </div>
+
+          <p id="loginMessage" class="login-message">
+            正在检查本地登录目录和浏览器登录态。
+          </p>
+
+          <div class="action-row">
+            <button id="loginButton" class="primary-btn">打开登录浏览器</button>
+            <button id="toggleBrowserButton" class="ghost-btn" disabled>召回浏览器</button>
+            <button id="deleteAccountButton" class="danger-btn">删除账号</button>
+            <button id="docButton" class="text-btn">打开小红书首页</button>
+          </div>
+
+          <div class="login-preview">
+            <div class="login-preview-stage">
+              <div id="loginPlaceholder" class="login-placeholder">
+                浏览器截图会显示在这里。后面把浏览器窗口移到屏幕外时，这里可以作为桌面内预览。
+              </div>
+              <img id="loginPreviewImage" class="login-preview-image" alt="小红书登录截图预览" hidden />
+            </div>
+            <div id="loginPreviewMeta" class="subtle-label">尚未捕获登录画面</div>
+            <div id="loginRefreshHint" class="subtle-label">截图预览未启动</div>
+          </div>
+        </section>
+
+        <section class="panel input-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Search Brief</p>
+              <h2>任务输入</h2>
+            </div>
+            <div class="panel-head-actions">
+              <span id="aiConfigSummary" class="subtle-label">AI 配置检查中</span>
+              <button id="aiSettingsButton" class="ghost-btn" type="button">AI 设置</button>
+              <div class="status-pill" id="runStatus">待机中</div>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>搜索需求</span>
+            <textarea id="queryInput" rows="5" placeholder="例如：帮我找几篇比较新的 Claude Code 使用技巧，最好有实测流程和踩坑总结。"></textarea>
+          </label>
+          <p id="aiConfigHint" class="subtle-label">
+            搜索 worker 使用 OpenAI 兼容接口。请在“AI 设置”中填写 Base URL、API Key 和模型名称。
+          </p>
+
+          <div class="action-row">
+            <button id="runButton" class="primary-btn">启动搜索</button>
+            <button id="stopButton" class="ghost-btn" disabled>停止</button>
+          </div>
+          <p id="runStatusHint" class="subtle-label">等待任务启动。</p>
+        </section>
+
+        <section class="panel log-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Live Feed</p>
+              <h2>运行状态</h2>
+            </div>
+            <span id="logMeta" class="subtle-label">单行轮转显示当前进度</span>
+          </div>
+          <div id="liveStatusShell" class="live-status-shell" data-thinking="false">
+            <div class="live-status-line">
+              <span id="liveStatusTime" class="live-status-time">--:--:--</span>
+              <span id="liveStatusText" class="live-status-text">等待任务启动。</span>
+              <span id="liveThinkingDots" class="thinking-dots" hidden aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </div>
+            <p id="liveStatusHint" class="subtle-label">搜索状态会在这里轮转更新，详细过程可展开查看。</p>
+          </div>
+          <details class="log-details">
+            <summary>查看详细过程</summary>
+            <div id="logList" class="log-list"></div>
+          </details>
+        </section>
+
+        <section class="panel log-panel internal-log-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Internal Diagnostics</p>
+              <h2>内部日志</h2>
+            </div>
+            <span id="internalLogMeta" class="subtle-label">等待主进程诊断日志</span>
+          </div>
+          <div id="internalLogEmptyState" class="login-placeholder" hidden>还没有内部诊断日志。</div>
+          <div id="internalLogList" class="log-list internal-log-list"></div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Result Desk</p>
+              <h2>结果预览</h2>
+            </div>
+            <div class="panel-head-actions">
+              <span id="resultMeta" class="subtle-label">加载示例结果中</span>
+              <button id="openLibraryButton" class="ghost-btn" type="button">帖子仓库</button>
+              <button id="clearResultsButton" class="ghost-btn" type="button">清理预览</button>
+            </div>
+          </div>
+          <div id="resultsGrid" class="results-grid"></div>
+        </section>
+      </main>
+
+      <section id="libraryPage" class="library-page" hidden>
+        <div class="panel library-page-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Post Library</p>
+              <h2>帖子仓库</h2>
+            </div>
+            <div class="panel-head-actions">
+              <span id="libraryPageMeta" class="subtle-label">当前收录 0 条帖子</span>
+              <button id="closeLibraryButton" class="ghost-btn" type="button">返回主页</button>
+            </div>
+          </div>
+
+          <div class="library-toolbar">
+            <label class="field library-search-field">
+              <span>仓库搜索</span>
+              <input
+                id="librarySearchInput"
+                type="text"
+                placeholder="搜索标题、作者、标签或正文关键词"
+              />
+            </label>
+
+            <label class="field library-sort-field">
+              <span>排序方式</span>
+              <select id="librarySortSelect">
+                <option value="default">默认排序</option>
+                <option value="time_desc">时间倒序</option>
+                <option value="time_asc">时间正序</option>
+                <option value="likes_desc">点赞最多</option>
+                <option value="collects_desc">收藏最多</option>
+                <option value="comments_desc">评论最多</option>
+              </select>
+            </label>
+
+            <div class="library-toolbar-actions">
+              <span id="librarySelectionMeta" class="subtle-label">未选择帖子</span>
+              <button id="librarySelectVisibleButton" class="ghost-btn" type="button">选择当前页</button>
+              <button id="libraryClearSelectionButton" class="ghost-btn" type="button">清空选择</button>
+              <button id="libraryBatchDeleteButton" class="danger-btn" type="button" disabled>批量删除</button>
+            </div>
+          </div>
+
+          <div id="libraryEmptyState" class="login-placeholder" hidden>
+            这里会汇总所有已经搜到的帖子，便于统一查看和管理。
+          </div>
+          <div id="libraryResultsGrid" class="results-grid library-results-grid"></div>
+          <div id="libraryPagination" class="library-pagination" hidden>
+            <div id="libraryPaginationMeta" class="subtle-label">第 1 / 1 页</div>
+            <div class="library-pagination-actions">
+              <button id="libraryPrevPageButton" class="ghost-btn" type="button">上一页</button>
+              <label class="library-page-jump">
+                <span>跳到</span>
+                <input id="libraryPageInput" type="number" min="1" step="1" inputmode="numeric" />
+                <span>页</span>
+              </label>
+              <button id="libraryJumpPageButton" class="ghost-btn" type="button">前往</button>
+              <button id="libraryNextPageButton" class="ghost-btn" type="button">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <template id="logItemTemplate">
+      <article class="log-item">
+        <div class="log-time"></div>
+        <div class="log-message"></div>
+      </article>
+    </template>
+
+    <template id="internalLogItemTemplate">
+      <article class="log-item internal-log-item">
+        <div class="log-time"></div>
+        <div class="log-message"></div>
+      </article>
+    </template>
+
+    <template id="resultCardTemplate">
+      <article class="result-card">
+        <div class="card-topline">
+          <span class="card-author"></span>
+          <span class="card-time"></span>
+        </div>
+        <h3 class="card-title"></h3>
+        <img class="card-image-preview" alt="结果图片预览" hidden />
+        <p class="card-content"></p>
+        <div class="card-images-meta"></div>
+        <div class="tag-row"></div>
+        <div class="stat-row">
+          <span class="stat likes"></span>
+          <span class="stat comments"></span>
+          <span class="stat collects"></span>
+        </div>
+        <button class="card-link text-btn">查看原帖</button>
+      </article>
+    </template>
+
+    <template id="taskHistoryItemTemplate">
+      <article class="task-history-item">
+        <div class="task-history-item-head">
+          <span class="task-history-status"></span>
+          <span class="task-history-time"></span>
+        </div>
+        <p class="task-history-query"></p>
+        <div class="task-history-meta">
+          <span class="task-history-posts"></span>
+          <span class="task-history-duration"></span>
+        </div>
+      </article>
+    </template>
+
+    <div id="settingsModal" class="result-modal" hidden>
+      <div id="settingsBackdrop" class="result-modal-backdrop"></div>
+      <div class="result-modal-panel settings-modal-panel">
+        <button id="closeSettingsButton" class="result-modal-close" type="button">关闭</button>
+        <div class="result-modal-head settings-modal-head">
+          <p class="section-kicker">AI Settings</p>
+          <h3>搜索模型配置</h3>
+          <p class="settings-intro">
+            桌面端搜索 worker 使用通用 OpenAI 兼容接口。这里保存的配置会优先覆盖 `.env` 中的同类环境变量。
+          </p>
+        </div>
+        <form id="aiSettingsForm" class="settings-form">
+          <label class="field">
+            <span>Base URL</span>
+            <input id="aiBaseUrlInput" type="url" placeholder="https://api.openai.com/v1" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>API Key</span>
+            <input id="aiApiKeyInput" type="password" placeholder="sk-..." autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Model</span>
+            <input id="aiModelInput" type="text" placeholder="gpt-4.1-mini" autocomplete="off" />
+          </label>
+          <div id="aiSettingsMeta" class="subtle-label">保存后，新任务会使用最新配置。</div>
+          <div class="action-row">
+            <button id="saveAiSettingsButton" class="primary-btn" type="submit">保存配置</button>
+            <button id="cancelAiSettingsButton" class="ghost-btn" type="button">取消</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="resultModal" class="result-modal" hidden>
+      <div class="result-modal-backdrop"></div>
+      <div class="result-modal-panel">
+        <button id="closeResultModalButton" class="result-modal-close" type="button">关闭</button>
+        <div class="result-modal-head">
+          <p id="modalAuthor" class="subtle-label"></p>
+          <p id="modalTime" class="subtle-label"></p>
+          <h3 id="modalTitle"></h3>
+        </div>
+        <div class="result-modal-body">
+          <div class="result-modal-media">
+            <div class="result-modal-section">
+              <div class="result-modal-links-head">
+                <h4>图片</h4>
+                <span id="modalImageCount" class="subtle-label"></span>
+              </div>
+              <div id="modalImageCarousel" class="modal-image-carousel">
+                <div class="modal-carousel-stage">
+                  <button
+                    id="modalPrevImageButton"
+                    class="modal-carousel-nav modal-carousel-nav-prev"
+                    type="button"
+                    aria-label="上一张"
+                  >&lt;</button>
+                  <img id="modalActiveImage" class="modal-active-image" alt="帖子图片预览" hidden />
+                  <div id="modalImageEmpty" class="subtle-label">没有图片</div>
+                  <button
+                    id="modalNextImageButton"
+                    class="modal-carousel-nav modal-carousel-nav-next"
+                    type="button"
+                    aria-label="下一张"
+                  >&gt;</button>
+                </div>
+              </div>
+              <div id="modalImageIndex" class="subtle-label"></div>
+            </div>
+          </div>
+          <div class="result-modal-copy">
+            <div class="result-modal-section">
+              <h4>完整正文</h4>
+              <p id="modalContent" class="modal-content"></p>
+            </div>
+            <div class="result-modal-section">
+              <div id="modalTags" class="tag-row"></div>
+            </div>
+            <div class="result-modal-section">
+              <button id="modalOpenPostButton" class="primary-btn" type="button">打开原帖</button>
+            </div>
+            <div class="result-modal-section">
+              <div id="modalStats" class="modal-stats"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="imageZoomModal" class="image-zoom-modal" hidden>
+      <div class="image-zoom-backdrop"></div>
+      <div class="image-zoom-panel">
+        <button id="closeImageZoomButton" class="result-modal-close" type="button">关闭</button>
+        <img id="zoomedImage" class="zoomed-image" alt="放大图片预览" />
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const errorBanner = document.getElementById('appErrorBanner');
+        const errorMeta = document.getElementById('appErrorMeta');
+        const errorText = document.getElementById('appErrorText');
+
+        function showStartupError(title, detail) {
+          if (!errorBanner || !errorMeta || !errorText) {
+            return;
+          }
+          errorBanner.hidden = false;
+          errorMeta.textContent = title || '未知错误';
+          errorText.textContent = typeof detail === 'string'
+            ? detail
+            : JSON.stringify(detail || '无额外信息', null, 2);
+        }
+
+        window.addEventListener('error', function (event) {
+          showStartupError(
+            'Renderer Early Error',
+            event.error && event.error.stack
+              ? event.error.stack
+              : (event.message || '未知渲染错误')
+          );
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+          const reason = event.reason;
+          showStartupError(
+            'Unhandled Rejection',
+            reason && reason.stack
+              ? reason.stack
+              : (typeof reason === 'string' ? reason : JSON.stringify(reason || '未知 Promise 错误', null, 2))
+          );
+        });
+
+        window.addEventListener('DOMContentLoaded', function () {
+          window.setTimeout(function () {
+            if (!window.desktopApi) {
+              showStartupError(
+                'Preload Missing',
+                'window.desktopApi 未注入。preload 没有成功加载，或 contextBridge 暴露失败。'
+              );
+            }
+          }, 300);
+        });
+      })();
+    </script>
+    <script type="module" src="./app.js"></script>
+  </body>
+  </html>
