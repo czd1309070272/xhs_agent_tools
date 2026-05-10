@@ -20,10 +20,10 @@ function withTempJsonFilePairs(task) {
   }
 }
 
-function browserDataDirExists() {
+function browserDataDirExists(dirPath = constants.XHS_BROWSER_DATA_DIR) {
   try {
-    return fs.existsSync(constants.XHS_BROWSER_DATA_DIR)
-      && fs.statSync(constants.XHS_BROWSER_DATA_DIR).isDirectory();
+    return fs.existsSync(dirPath)
+      && fs.statSync(dirPath).isDirectory();
   } catch {
     return false;
   }

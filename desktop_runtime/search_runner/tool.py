@@ -7,9 +7,9 @@ from .events import emit_event
 
 
 class DesktopXHSAgentTool(XHSAgentTool):
-    def __init__(self, api_key: str, base_url: str, model: str):
+    def __init__(self, api_key: str, base_url: str, model: str, browser_data_dir: str | None = None):
         super().__init__(api_key=api_key, base_url=base_url, model=model)
-        self.browser_data_dir = str(WORKSPACE_ROOT / "xhs_browser_data")
+        self.browser_data_dir = browser_data_dir or str(WORKSPACE_ROOT / "xhs_browser_data")
 
     def _wait_for_captcha(self, page):
         print("检测到验证码，等待手动完成验证。")

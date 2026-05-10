@@ -16,6 +16,10 @@ export function createResultsController({
   taskHistoryController,
   updateRunAvailability
 }) {
+  function emitLibraryStateUpdated() {
+    window.dispatchEvent(new CustomEvent('library-state-updated'));
+  }
+
   function getFilteredLibraryResults() {
     const keyword = state.librarySearchTerm.trim().toLowerCase();
     return state.libraryResults.filter((item) => {
@@ -26,19 +30,39 @@ export function createResultsController({
     });
   }
 
-  function openLibraryPage() {
+  function openLibraryPage(filterOptions = {}) {
     taskHistoryController.setTaskHistoryOpen(false);
     elements.taskHistoryShell.classList.add('is-hidden');
+    elements.homePage.hidden = true;
     elements.mainPage.hidden = true;
     elements.libraryPage.hidden = false;
+    elements.reportPage.hidden = true;
+
+    // 如果传入了筛选参数（来自报告），应用筛选
+    if (filterOptions.reportId && Array.isArray(filterOptions.posts)) {
+      state.libraryFilterReportId = filterOptions.reportId;
+      state.libraryResults = filterOptions.posts;
+      state.libraryCurrentPage = 1;
+    } else {
+      // 正常打开帖子仓库，恢复完整列表
+      state.libraryFilterReportId = null;
+      state.libraryResults = state.fullLibraryResults || [];
+      state.libraryCurrentPage = 1;
+    }
+
+    renderResults(state.previewResults);
+
     if (elements.appShell) {
       elements.appShell.scrollTop = 0;
     }
   }
 
   function closeLibraryPage() {
-    elements.taskHistoryShell.classList.remove('is-hidden');
-    elements.mainPage.hidden = false;
+    // 清除报告筛选状态
+    state.libraryFilterReportId = null;
+    elements.taskHistoryShell.classList.add('is-hidden');
+    elements.homePage.hidden = false;
+    elements.mainPage.hidden = true;
     elements.libraryPage.hidden = true;
   }
 
@@ -191,6 +215,7 @@ export function createResultsController({
 
       normalizedIds.forEach((postId) => state.selectedLibraryPostIds.delete(postId));
       state.libraryResults = Array.isArray(response.posts) ? response.posts : [];
+      state.fullLibraryResults = Array.isArray(response.posts) ? response.posts : state.libraryResults;
       state.previewResults = Array.isArray(response.previewResults) ? response.previewResults : state.previewResults;
 
       if (state.activeResult && normalizedIds.includes(getResultIdentity(state.activeResult))) {
@@ -198,6 +223,7 @@ export function createResultsController({
       }
 
       renderResults(state.previewResults);
+      emitLibraryStateUpdated();
       appendLog({
         level: 'success',
         timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false }),
@@ -352,8 +378,15 @@ export function createResultsController({
   }
 
   function bindEvents() {
-    elements.openLibraryButton.addEventListener('click', openLibraryPage);
+    elements.openLibraryButton.addEventListener('click', () => openLibraryPage());
+    elements.openLibraryFromHomeButton.addEventListener('click', () => openLibraryPage());
     elements.closeLibraryButton.addEventListener('click', closeLibraryPage);
+
+    // 监听来自报告页面的筛选事件
+    window.addEventListener('open-library-with-filter', (event) => {
+      openLibraryPage(event.detail);
+    });
+
     elements.librarySearchInput.addEventListener('input', (event) => {
       state.librarySearchTerm = event.target.value || '';
       state.libraryCurrentPage = 1;
@@ -415,17 +448,26 @@ export function createResultsController({
 
   function hydrateInitialState(initialState) {
     state.libraryResults = Array.isArray(initialState.sampleResults) ? initialState.sampleResults : [];
+    state.fullLibraryResults = Array.isArray(initialState.sampleResults) ? initialState.sampleResults : [];
     state.previewResults = Array.isArray(initialState.previewResults) ? initialState.previewResults : [];
     state.libraryCurrentPage = 1;
     elements.librarySortSelect.value = state.librarySortMode;
     elements.librarySearchInput.value = state.librarySearchTerm;
     renderResults(state.previewResults);
+    emitLibraryStateUpdated();
   }
 
   function handleCompleted(payload) {
     if (!payload.cancelled) {
-      state.libraryResults = mergeLibraryResults(state.libraryResults, payload.results || []);
-      renderResults(payload.results || []);
+      const newResults = payload.results || [];
+      state.libraryResults = mergeLibraryResults(state.libraryResults, newResults);
+      state.fullLibraryResults = state.libraryResults;
+
+      // 更新预览区：合并新结果到现有预览
+      state.previewResults = mergeLibraryResults(state.previewResults, newResults);
+
+      renderResults(state.previewResults);
+      emitLibraryStateUpdated();
     }
   }
 

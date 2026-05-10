@@ -3,12 +3,14 @@ const { app, BrowserWindow, Menu } = require('electron');
 const { createMainWindow } = require('../services/windowService');
 const { registerIpcHandlers } = require('../ipc/registerIpcHandlers');
 const { refreshLoginStateFromDisk, finalizeBeforeQuit } = require('../services/loginService');
+const { startScheduledTaskScheduler, stopScheduledTaskScheduler } = require('../services/scheduledTaskService');
 
 registerIpcHandlers();
 
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
   refreshLoginStateFromDisk();
+  startScheduledTaskScheduler();
   createMainWindow();
 
   app.on('activate', () => {
@@ -19,6 +21,7 @@ app.whenReady().then(() => {
 });
 
 app.on('before-quit', async () => {
+  stopScheduledTaskScheduler();
   await finalizeBeforeQuit();
 });
 

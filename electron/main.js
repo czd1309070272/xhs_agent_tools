@@ -4,13 +4,14 @@ const { app, BrowserWindow, Menu } = require('electron');
 const runtime = require('./main/state/runtime');
 const { registerIpcHandlers } = require('./main/ipc/registerIpcHandlers');
 const { refreshLoginStateFromDisk, finalizeBeforeQuit } = require('./main/services/loginService');
+const { startScheduledTaskScheduler, stopScheduledTaskScheduler } = require('./main/services/scheduledTaskService');
 
 function createWindow() {
   runtime.mainWindow = new BrowserWindow({
     width: 1280,
-    height: 720,
+    height: 900,
     minWidth: 1100,
-    minHeight: 680,
+    minHeight: 820,
     backgroundColor: '#efe4d2',
     title: 'XHS Agent Desktop',
     autoHideMenuBar: true,
@@ -30,6 +31,7 @@ registerIpcHandlers();
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
   refreshLoginStateFromDisk();
+  startScheduledTaskScheduler();
   createWindow();
 
   app.on('activate', () => {
@@ -40,6 +42,7 @@ app.whenReady().then(() => {
 });
 
 app.on('before-quit', async () => {
+  stopScheduledTaskScheduler();
   await finalizeBeforeQuit();
 });
 

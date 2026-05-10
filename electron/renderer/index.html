@@ -18,7 +18,7 @@
       <pre id="appErrorText" class="app-error-text"></pre>
     </div>
 
-    <div id="taskHistoryShell" class="task-history-shell">
+    <div id="taskHistoryShell" class="task-history-shell is-hidden">
       <aside id="taskHistorySidebar" class="task-history-sidebar">
         <div class="task-history-sidebar-head">
           <div>
@@ -37,103 +37,245 @@
     </div>
 
     <div class="app-shell">
-      <main id="mainPage" class="workspace">
-        <section class="panel login-panel">
-          <div class="panel-head">
-            <div>
-              <p class="section-kicker">XHS Login</p>
-              <h2>小红书登录</h2>
-            </div>
-            <div class="status-pill" id="loginStatus">检查中</div>
+      <main id="homePage" class="home-page">
+        <section class="panel home-hero-panel">
+          <div class="home-hero-copy">
+            <p class="section-kicker">XHS Agent Desk</p>
+            <h1>小红书 Agent 工作台</h1>
+            <p class="home-hero-text">
+              从这里检查登录、配置 AI、进入任务执行，并快速打开报告与帖子仓库。
+            </p>
           </div>
-
-          <p id="loginMessage" class="login-message">
-            正在检查本地登录目录和浏览器登录态。
-          </p>
-
-          <div class="action-row">
-            <button id="loginButton" class="primary-btn">打开登录浏览器</button>
-            <button id="toggleBrowserButton" class="ghost-btn" disabled>召回浏览器</button>
-            <button id="deleteAccountButton" class="danger-btn">删除账号</button>
-            <button id="docButton" class="text-btn">打开小红书首页</button>
-          </div>
-
-          <div class="login-preview">
-            <div class="login-preview-stage">
-              <div id="loginPlaceholder" class="login-placeholder">
-                浏览器截图会显示在这里。后面把浏览器窗口移到屏幕外时，这里可以作为桌面内预览。
-              </div>
-              <img id="loginPreviewImage" class="login-preview-image" alt="小红书登录截图预览" hidden />
-            </div>
-            <div id="loginPreviewMeta" class="subtle-label">尚未捕获登录画面</div>
-            <div id="loginRefreshHint" class="subtle-label">截图预览未启动</div>
+          <div class="home-hero-status">
+            <span id="homeRunStatus" class="status-pill">待机中</span>
+            <span id="homeTaskModeMeta" class="subtle-label">当前模式：立即执行</span>
           </div>
         </section>
 
-        <section class="panel input-panel">
-          <div class="panel-head">
-            <div>
-              <p class="section-kicker">Search Brief</p>
-              <h2>任务输入</h2>
+        <section class="home-card-grid">
+          <article class="panel home-card home-card-login">
+            <div class="home-card-head">
+              <div>
+                <p class="section-kicker">XHS Login</p>
+                <h2>小红书登录状态</h2>
+              </div>
+              <span id="homeLoginStatus" class="status-pill">检查中</span>
             </div>
+            <p id="homeLoginMessage" class="home-card-body">正在检查本地登录目录和浏览器登录态。</p>
+            <div class="home-card-actions">
+              <button id="homeLoginButton" class="primary-btn" type="button">账号管理</button>
+            </div>
+          </article>
+
+          <article class="panel home-card">
+            <div class="home-card-head">
+              <div>
+                <p class="section-kicker">AI Settings</p>
+                <h2>AI 设置状态</h2>
+              </div>
+              <span id="homeAiStatus" class="status-pill">检查中</span>
+            </div>
+            <p id="homeAiSummary" class="home-card-body">正在检查 OpenAI 兼容接口配置。</p>
+            <div class="home-card-actions">
+              <button id="aiSettingsButton" class="primary-btn" type="button">配置 AI</button>
+            </div>
+          </article>
+
+          <article class="panel home-card home-card-task">
+            <div class="home-card-head">
+              <div>
+                <p class="section-kicker">Task Runner</p>
+                <h2>任务执行入口</h2>
+              </div>
+              <span id="homeTaskStatus" class="status-pill">待机中</span>
+            </div>
+            <p id="homeTaskSummary" class="home-card-body">进入当前任务执行界面，配置立即搜索或每日任务。</p>
+            <div class="home-card-actions">
+              <button id="openTaskPageButton" class="primary-btn" type="button">进入任务执行</button>
+            </div>
+          </article>
+
+          <article class="panel home-card home-card-competitor">
+            <div class="home-card-head">
+              <div>
+                <p class="section-kicker">Competitor Watch</p>
+                <h2>竞品监控入口</h2>
+              </div>
+              <span id="homeCompetitorStatus" class="status-pill">监控</span>
+            </div>
+            <p id="homeCompetitorSummary" class="home-card-body">配置竞品关键词、关注方向和每日执行时间，持续跟踪小红书相关动态。</p>
+            <div class="home-card-actions">
+              <button id="openCompetitorMonitorButton" class="primary-btn" type="button">配置竞品监控</button>
+            </div>
+          </article>
+
+          <article class="panel home-card">
+            <div class="home-card-head">
+              <div>
+                <p class="section-kicker">Daily Reports</p>
+                <h2>每日报告入口</h2>
+              </div>
+              <span id="homeReportStatus" class="status-pill">报告</span>
+            </div>
+            <p id="homeReportSummary" class="home-card-body">查看每日任务生成的 LLM 分析报告。</p>
+            <div class="home-card-actions">
+              <button id="openReportFromHomeButton" class="primary-btn" type="button">打开每日报告</button>
+            </div>
+          </article>
+
+          <article class="panel home-card">
+            <div class="home-card-head">
+              <div>
+                <p class="section-kicker">Post Library</p>
+                <h2>帖子仓库入口</h2>
+              </div>
+              <span id="homeLibraryStatus" class="status-pill">仓库</span>
+            </div>
+            <p id="homeLibrarySummary" class="home-card-body">当前收录 0 条帖子，可进入仓库统一检索、排序和管理。</p>
+            <div class="home-card-actions">
+              <button id="openLibraryFromHomeButton" class="primary-btn" type="button">打开帖子仓库</button>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <main id="mainPage" class="workspace" hidden>
+        <section class="panel page-topbar">
+          <div>
+            <p class="section-kicker">Task Runner</p>
+            <h2>任务执行</h2>
+          </div>
+          <div class="page-topbar-actions">
+            <label class="field task-account-field topbar-account-field">
+              <span>执行账号</span>
+              <select id="taskAccountSelect">
+                <option value="">请先新增账号</option>
+              </select>
+            </label>
+            <span id="taskAccountHint" class="subtle-label">搜索会使用当前选择账号的浏览器登录态。</span>
+            <button id="backHomeFromTaskButton" class="ghost-btn" type="button">返回主界面</button>
+          </div>
+        </section>
+
+        <section class="dashboard-row">
+          <section id="inputPanel" class="panel input-panel">
+            <div class="panel-head">
+              <div>
+                <p class="section-kicker">Search Brief</p>
+                <h2>任务输入</h2>
+              </div>
             <div class="panel-head-actions">
               <span id="aiConfigSummary" class="subtle-label">AI 配置检查中</span>
-              <button id="aiSettingsButton" class="ghost-btn" type="button">AI 设置</button>
               <div class="status-pill" id="runStatus">待机中</div>
             </div>
           </div>
 
-          <label class="field">
-            <span>搜索需求</span>
-            <textarea id="queryInput" rows="5" placeholder="例如：帮我找几篇比较新的 Claude Code 使用技巧，最好有实测流程和踩坑总结。"></textarea>
-          </label>
-          <p id="aiConfigHint" class="subtle-label">
-            搜索 worker 使用 OpenAI 兼容接口。请在“AI 设置”中填写 Base URL、API Key 和模型名称。
-          </p>
+            <div class="input-panel-scroll">
+              <div class="task-mode-bar">
+                <div class="task-mode-switch" role="tablist" aria-label="任务模式切换">
+                  <button id="runNowModeButton" class="task-mode-chip is-active" type="button">立即执行</button>
+                  <button id="dailyTaskModeButton" class="task-mode-chip" type="button">每日任务</button>
+                </div>
+                <span id="taskModeMeta" class="subtle-label">当前模式：立即执行，提交后立刻启动真实搜索。</span>
+              </div>
 
-          <div class="action-row">
-            <button id="runButton" class="primary-btn">启动搜索</button>
-            <button id="stopButton" class="ghost-btn" disabled>停止</button>
-          </div>
-          <p id="runStatusHint" class="subtle-label">等待任务启动。</p>
-        </section>
+              <div class="input-panel-footer">
+                <div class="action-row">
+                  <button id="runButton" class="primary-btn">启动搜索</button>
+                  <button id="stopButton" class="ghost-btn" disabled>停止</button>
+                </div>
+                <p id="runStatusHint" class="subtle-label">等待任务启动。</p>
+              </div>
 
-        <section class="panel log-panel">
-          <div class="panel-head">
-            <div>
-              <p class="section-kicker">Live Feed</p>
-              <h2>运行状态</h2>
-            </div>
-            <span id="logMeta" class="subtle-label">单行轮转显示当前进度</span>
-          </div>
-          <div id="liveStatusShell" class="live-status-shell" data-thinking="false">
-            <div class="live-status-line">
-              <span id="liveStatusTime" class="live-status-time">--:--:--</span>
-              <span id="liveStatusText" class="live-status-text">等待任务启动。</span>
-              <span id="liveThinkingDots" class="thinking-dots" hidden aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </div>
-            <p id="liveStatusHint" class="subtle-label">搜索状态会在这里轮转更新，详细过程可展开查看。</p>
-          </div>
-          <details class="log-details">
-            <summary>查看详细过程</summary>
-            <div id="logList" class="log-list"></div>
-          </details>
-        </section>
+              <label class="field">
+                <span id="queryFieldLabel">搜索需求</span>
+                <textarea id="queryInput" rows="5" placeholder="例如：帮我找几篇比较新的 Claude Code 使用技巧，最好有实测流程和踩坑总结。"></textarea>
+              </label>
 
-        <section class="panel log-panel internal-log-panel">
-          <div class="panel-head">
-            <div>
-              <p class="section-kicker">Internal Diagnostics</p>
-              <h2>内部日志</h2>
+              <div id="dailyTaskFields" class="daily-task-fields" hidden>
+                <div class="daily-task-grid">
+                  <label class="field">
+                    <span>任务名称</span>
+                    <input id="taskNameInput" type="text" placeholder="例如：Claude Code 晨报" />
+                  </label>
+
+                  <label class="field">
+                    <span>每日执行时间</span>
+                    <input id="dailyTimeInput" type="time" value="09:30" />
+                  </label>
+                </div>
+
+                <div class="schedule-toggle-row">
+                  <label class="schedule-toggle">
+                    <input id="taskEnabledInput" type="checkbox" checked />
+                    <span class="schedule-toggle-knob"></span>
+                    <span>保存后默认启用</span>
+                  </label>
+                  <span class="subtle-label">第一版先固定为“每天一次”，后面再接数据库和调度器。</span>
+                </div>
+
+                <div class="task-draft-card">
+                  <div class="task-draft-head">
+                    <div>
+                      <p class="section-kicker">Daily Draft</p>
+                      <h3 id="taskDraftTitle">每日任务草稿</h3>
+                    </div>
+                    <span id="taskDraftBadge" class="status-pill">每日执行</span>
+                  </div>
+                  <div class="task-draft-meta">
+                    <span id="taskDraftTime">执行时间 09:30</span>
+                    <span id="taskDraftState">状态：启用</span>
+                  </div>
+                  <p id="taskDraftHint" class="task-draft-hint">
+                    保存后，这条任务会按当前搜索需求在每天固定时间自动执行。
+                  </p>
+                </div>
+              </div>
+              <p id="aiConfigHint" class="subtle-label">
+                搜索 worker 使用 OpenAI 兼容接口。请在“AI 设置”中填写 Base URL、API Key 和模型名称。
+              </p>
             </div>
-            <span id="internalLogMeta" class="subtle-label">等待主进程诊断日志</span>
+          </section>
+
+          <div class="status-column">
+            <section class="panel log-panel">
+              <div class="panel-head">
+                <div>
+                  <p class="section-kicker">Live Feed</p>
+                  <h2>运行状态</h2>
+                </div>
+                <span id="logMeta" class="subtle-label">单行轮转显示当前进度</span>
+              </div>
+              <div id="liveStatusShell" class="live-status-shell" data-thinking="false">
+                <div class="live-status-line">
+                  <span id="liveStatusTime" class="live-status-time">--:--:--</span>
+                  <span id="liveStatusText" class="live-status-text">等待任务启动。</span>
+                  <span id="liveThinkingDots" class="thinking-dots" hidden aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </span>
+                </div>
+                <p id="liveStatusHint" class="subtle-label">搜索状态会在这里轮转更新，详细过程可展开查看。</p>
+              </div>
+              <details class="log-details">
+                <summary>查看详细过程</summary>
+                <div id="logList" class="log-list"></div>
+              </details>
+            </section>
+
+            <section class="panel log-panel internal-log-panel">
+              <div class="panel-head">
+                <div>
+                  <p class="section-kicker">Internal Diagnostics</p>
+                  <h2>内部日志</h2>
+                </div>
+                <span id="internalLogMeta" class="subtle-label">等待主进程诊断日志</span>
+              </div>
+              <div id="internalLogEmptyState" class="login-placeholder" hidden>还没有内部诊断日志。</div>
+              <div id="internalLogList" class="log-list internal-log-list"></div>
+            </section>
           </div>
-          <div id="internalLogEmptyState" class="login-placeholder" hidden>还没有内部诊断日志。</div>
-          <div id="internalLogList" class="log-list internal-log-list"></div>
         </section>
 
         <section class="panel result-panel">
@@ -144,6 +286,7 @@
             </div>
             <div class="panel-head-actions">
               <span id="resultMeta" class="subtle-label">加载示例结果中</span>
+              <button id="openReportButton" class="ghost-btn" type="button">每日报告</button>
               <button id="openLibraryButton" class="ghost-btn" type="button">帖子仓库</button>
               <button id="clearResultsButton" class="ghost-btn" type="button">清理预览</button>
             </div>
@@ -151,6 +294,25 @@
           <div id="resultsGrid" class="results-grid"></div>
         </section>
       </main>
+
+      <section id="competitorPage" class="library-page" hidden>
+        <div class="panel library-page-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Competitor Watch</p>
+              <h2>竞品监控</h2>
+            </div>
+            <div class="panel-head-actions">
+              <span class="subtle-label">待配置</span>
+              <button id="closeCompetitorButton" class="ghost-btn" type="button">返回主页</button>
+            </div>
+          </div>
+
+          <div class="login-placeholder competitor-empty-state">
+            竞品监控页面待接入。
+          </div>
+        </div>
+      </section>
 
       <section id="libraryPage" class="library-page" hidden>
         <div class="panel library-page-panel">
@@ -214,6 +376,26 @@
           </div>
         </div>
       </section>
+
+      <section id="reportPage" class="library-page" hidden>
+        <div class="panel library-page-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Daily Reports</p>
+              <h2>每日报告</h2>
+            </div>
+            <div class="panel-head-actions">
+              <span id="reportPageMeta" class="subtle-label">共 0 份报告</span>
+              <button id="closeReportButton" class="ghost-btn" type="button">返回主页</button>
+            </div>
+          </div>
+
+          <div id="reportEmptyState" class="login-placeholder" hidden>
+            <p>暂无报告</p>
+          </div>
+          <div id="reportListContainer" class="report-list"></div>
+        </div>
+      </section>
     </div>
 
     <template id="logItemTemplate">
@@ -264,6 +446,24 @@
       </article>
     </template>
 
+    <template id="reportCardTemplate">
+      <article class="report-card">
+        <div class="report-card-head">
+          <h3 class="report-card-title"></h3>
+          <span class="report-card-date"></span>
+        </div>
+        <div class="report-card-meta">
+          <span class="report-card-posts"></span>
+          <span class="report-card-status"></span>
+        </div>
+        <div class="report-card-summary"></div>
+        <div class="report-card-actions">
+          <button class="report-view-detail-btn text-btn">查看完整报告</button>
+          <button class="report-view-posts-btn text-btn">查看相关帖子</button>
+        </div>
+      </article>
+    </template>
+
     <div id="settingsModal" class="result-modal" hidden>
       <div id="settingsBackdrop" class="result-modal-backdrop"></div>
       <div class="result-modal-panel settings-modal-panel">
@@ -294,6 +494,70 @@
             <button id="cancelAiSettingsButton" class="ghost-btn" type="button">取消</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <div id="loginModal" class="result-modal" hidden>
+      <div id="loginModalBackdrop" class="result-modal-backdrop"></div>
+      <div class="result-modal-panel login-modal-panel">
+        <button id="closeLoginModalButton" class="result-modal-close" type="button">关闭</button>
+        <section class="login-panel login-modal-content">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">XHS Login</p>
+              <h2>小红书账号管理</h2>
+            </div>
+            <div class="status-pill" id="loginStatus">检查中</div>
+          </div>
+
+          <p id="loginMessage" class="login-message">
+            正在检查本地登录目录和浏览器登录态。
+          </p>
+
+          <div class="account-pool-panel">
+            <div class="account-pool-head">
+              <div>
+                <p class="section-kicker">Account Pool</p>
+                <h3>账号池</h3>
+              </div>
+              <span id="accountPoolMeta" class="subtle-label">当前 1 个账号</span>
+            </div>
+
+            <div class="account-create-grid">
+              <label class="field">
+                <span>账号用户名</span>
+                <input id="accountUsernameInput" type="text" placeholder="例如：brand_ops_01" autocomplete="off" />
+              </label>
+
+              <label class="field">
+                <span>浏览器数据目录</span>
+                <input id="accountBrowserDataInput" type="text" value="xhs_browser_data_{用户名}" readonly />
+              </label>
+
+              <button id="addAccountLoginButton" class="primary-btn" type="button">新增账号登录</button>
+            </div>
+
+            <div id="accountPoolList" class="account-pool-list" aria-label="小红书账号池"></div>
+          </div>
+
+          <div class="action-row">
+            <button id="loginButton" class="primary-btn">打开登录浏览器</button>
+            <button id="toggleBrowserButton" class="ghost-btn" disabled>召回浏览器</button>
+            <button id="deleteAccountButton" class="danger-btn">删除账号</button>
+            <button id="docButton" class="text-btn">打开小红书首页</button>
+          </div>
+
+          <div class="login-preview">
+            <div class="login-preview-stage">
+              <div id="loginPlaceholder" class="login-placeholder">
+                浏览器截图会显示在这里。后面把浏览器窗口移到屏幕外时，这里可以作为桌面内预览。
+              </div>
+              <img id="loginPreviewImage" class="login-preview-image" alt="小红书登录截图预览" hidden />
+            </div>
+            <div id="loginPreviewMeta" class="subtle-label">尚未捕获登录画面</div>
+            <div id="loginRefreshHint" class="subtle-label">截图预览未启动</div>
+          </div>
+        </section>
       </div>
     </div>
 
